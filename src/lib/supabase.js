@@ -50,7 +50,7 @@ export async function uploadPaymentScreenshot(file, orderId) {
 export async function fetchActiveProducts() {
   const { data, error } = await supabase
     .from('products')
-    .select('id, title, description, images, selling_price, popularity_tag, stock_qty')
+    .select('id, title, description, images, selling_price, popularity_tag, stock_qty, category')
     .eq('is_active', true)
     .order('created_at', { ascending: false })
   if (error) throw error
