@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react'
-import Shop from './components/Shop'
+import Header from './components/Header'
+import Home from './components/Home'
+import Store from './components/Store'
+import Contact from './components/Contact'
 import Cart from './components/Cart'
 import Checkout from './components/Checkout'
 import Payment from './components/Payment'
 import Confirmation from './components/Confirmation'
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
-const LOGO_URL = `${SUPABASE_URL}/storage/v1/object/public/product-images/branding/sleksar.jpg`
-
 export default function App() {
-  const [page, setPage] = useState('shop') // shop | cart | checkout | payment | confirmation
+  const [page, setPage] = useState('home') // home | store | contact | cart | checkout | payment | confirmation
+  const [storeAnchor, setStoreAnchor] = useState(null)
   const [cart, setCart] = useState([])
   const [telegramToken, setTelegramToken] = useState(null)
   const [orderId, setOrderId] = useState(null)
@@ -21,6 +22,12 @@ export default function App() {
     const token = params.get('token')
     if (token) setTelegramToken(token)
   }, [])
+
+  function navigate(target, anchor = null) {
+    setPage(target)
+    setStoreAnchor(target === 'store' ? anchor : null)
+    if (target !== 'store' || !anchor) window.scrollTo(0, 0)
+  }
 
   function addToCart(product) {
     setCart((prev) => {
@@ -49,26 +56,20 @@ export default function App() {
 
   return (
     <>
-      <header className="site-header">
-        <div className="container">
-          <div className="brand" onClick={() => setPage('shop')} style={{ cursor: 'pointer' }}>
-            <img src={LOGO_URL} alt="Slek Sar" />
-            Slek Sar
-          </div>
-          <button className="cart-btn" onClick={() => setPage('cart')}>
-            Cart {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
-          </button>
-        </div>
-      </header>
+      <Header page={page} onNavigate={navigate} cartCount={cartCount} onCartClick={() => navigate('cart')} />
 
-      {page === 'shop' && <Shop onAddToCart={addToCart} />}
+      {page === 'home' && <Home onNavigate={navigate} />}
+
+      {page === 'store' && <Store anchor={storeAnchor} onAddToCart={addToCart} />}
+
+      {page === 'contact' && <Contact />}
 
       {page === 'cart' && (
         <Cart
           cart={cart}
           onUpdateQty={updateQty}
           onRemove={removeItem}
-          onCheckout={() => setPage('checkout')}
+          onCheckout={() => navigate('checkout')}
         />
       )}
 
@@ -79,21 +80,21 @@ export default function App() {
           onOrderCreated={(id, total) => {
             setOrderId(id)
             setOrderTotal(total)
-            setPage('payment')
+            navigate('payment')
           }}
         />
       )}
 
       {page === 'payment' && (
-        <Payment orderId={orderId} total={orderTotal} onSubmitted={() => setPage('confirmation')} />
+        <Payment orderId={orderId} total={orderTotal} onSubmitted={() => navigate('confirmation')} />
       )}
 
       {page === 'confirmation' && <Confirmation orderId={orderId} />}
 
-      {page === 'shop' && cartCount > 0 && (
+      {page === 'store' && cartCount > 0 && (
         <div className="mobile-cart-bar">
           <span className="total">Cart: ${cartTotal.toFixed(2)}</span>
-          <button onClick={() => setPage('cart')}>View Cart</button>
+          <button onClick={() => navigate('cart')}>View Cart</button>
         </div>
       )}
     </>
