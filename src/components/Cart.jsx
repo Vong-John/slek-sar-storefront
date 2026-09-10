@@ -18,40 +18,31 @@ export default function Cart({ cart, onUpdateQty, onRemove, onCheckout }) {
       <h1 className="section-title">Your Cart</h1>
 
       {cart.map((item) => (
-        <div
-          key={item.id}
-          style={{
-            display: 'flex',
-            gap: 12,
-            alignItems: 'center',
-            padding: '12px 0',
-            borderBottom: '1px solid #eee',
-          }}
-        >
-          <div style={{ width: 56, height: 56, border: '2px solid #0a0a0a', borderRadius: 4, overflow: 'hidden', flexShrink: 0 }}>
-            {item.images?.[0] && <img src={item.images[0]} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+        <div key={item.id} className="cart-item">
+          <div className="cart-item-thumb">
+            {item.images?.[0] && <img src={item.images[0]} alt={item.title} />}
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600 }}>{item.title}</div>
-            <div style={{ fontSize: 13, color: '#666' }}>${Number(item.selling_price).toFixed(2)} each</div>
+          <div className="cart-item-info">
+            <div className="cart-item-title">{item.title}</div>
+            <div className="cart-item-price">${Number(item.selling_price).toFixed(2)} each</div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button onClick={() => onUpdateQty(item.id, item.qty - 1)} style={{ border: '1px solid #ccc', width: 28, height: 28, borderRadius: 4 }}>-</button>
+          <div className="qty-control">
+            <button onClick={() => onUpdateQty(item.id, item.qty - 1)}>−</button>
             <span>{item.qty}</span>
-            <button onClick={() => onUpdateQty(item.id, item.qty + 1)} style={{ border: '1px solid #ccc', width: 28, height: 28, borderRadius: 4 }}>+</button>
+            <button onClick={() => onUpdateQty(item.id, item.qty + 1)}>+</button>
           </div>
-          <button onClick={() => onRemove(item.id)} style={{ color: '#B3261E', fontSize: 13, fontWeight: 600 }}>Remove</button>
+          <button className="remove-btn" onClick={() => onRemove(item.id)}>Remove</button>
         </div>
       ))}
 
-      <div style={{ marginTop: 20, fontSize: 14 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+      <div className="cart-summary">
+        <div className="cart-summary-row">
           <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+        <div className="cart-summary-row">
           <span>Delivery Fee</span><span>${DELIVERY_FEE.toFixed(2)}</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 17 }}>
+        <div className="cart-summary-row total">
           <span>Total</span><span>${total.toFixed(2)}</span>
         </div>
       </div>
