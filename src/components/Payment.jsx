@@ -39,22 +39,7 @@ export default function Payment({ orderId, total, onSubmitted }) {
       </div>
 
       {/* Replace this placeholder with your actual ABA/Wing QR image */}
-      <div
-        style={{
-          border: '3px solid #0a0a0a',
-          borderRadius: 4,
-          aspectRatio: '1 / 1',
-          maxWidth: 260,
-          margin: '0 auto 20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#999',
-          fontSize: 13,
-          textAlign: 'center',
-          padding: 16,
-        }}
-      >
+      <div className="qr-placeholder">
         [ Your payment QR code goes here — upload it as a static image ]
       </div>
 
