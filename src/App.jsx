@@ -7,12 +7,27 @@ import Cart from './components/Cart'
 import Checkout from './components/Checkout'
 import Payment from './components/Payment'
 import Confirmation from './components/Confirmation'
+import TelegramGate from './components/TelegramGate'
+
+const CART_STORAGE_KEY = 'sleksar_cart'
+const CONTACT_STATUS_KEY = 'sleksar_contact_status' // sessionStorage: 'declined' once acknowledged this visit
+
+function loadStoredCart() {
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
 
 export default function App() {
   const [page, setPage] = useState('home') // home | store | contact | cart | checkout | payment | confirmation
   const [storeAnchor, setStoreAnchor] = useState(null)
-  const [cart, setCart] = useState([])
+  const [cart, setCart] = useState(loadStoredCart)
   const [telegramToken, setTelegramToken] = useState(null)
+  const [telegramDeclined, setTelegramDeclined] = useState(false)
+  const [gateResolved, setGateResolved] = useState(false)
   const [orderId, setOrderId] = useState(null)
   const [orderTotal, setOrderTotal] = useState(0)
 
@@ -20,8 +35,39 @@ export default function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const token = params.get('token')
-    if (token) setTelegramToken(token)
+    if (token) {
+      setTelegramToken(token)
+      setGateResolved(true)
+      sessionStorage.removeItem(CONTACT_STATUS_KEY)
+      return
+    }
+    // No token in the URL this load — check if they already acknowledged
+    // skipping Telegram earlier in this browser session, so we don't
+    // ask twice.
+    if (sessionStorage.getItem(CONTACT_STATUS_KEY) === 'declined') {
+      setTelegramDeclined(true)
+      setGateResolved(true)
+    }
   }, [])
+
+  // Persist the cart so it survives a full page reload — including the
+  // reload that happens when someone leaves for Telegram and comes back
+  // via a fresh link.
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart))
+    } catch {
+      // ignore storage errors (e.g. private browsing)
+    }
+  }, [cart])
+
+  function resolveGate(result) {
+    if (result === 'declined') {
+      sessionStorage.setItem(CONTACT_STATUS_KEY, 'declined')
+      setTelegramDeclined(true)
+    }
+    setGateResolved(true)
+  }
 
   function navigate(target, anchor = null) {
     setPage(target)
@@ -54,6 +100,10 @@ export default function App() {
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0)
   const cartTotal = cart.reduce((sum, i) => sum + i.selling_price * i.qty, 0) + (cart.length > 0 ? 2 : 0)
 
+  if (!gateResolved) {
+    return <TelegramGate onResolve={resolveGate} />
+  }
+
   return (
     <>
       <Header page={page} onNavigate={navigate} cartCount={cartCount} onCartClick={() => navigate('cart')} />
@@ -77,9 +127,11 @@ export default function App() {
         <Checkout
           cart={cart}
           telegramToken={telegramToken}
+          telegramDeclined={telegramDeclined}
           onOrderCreated={(id, total) => {
             setOrderId(id)
             setOrderTotal(total)
+            setCart([])
             navigate('payment')
           }}
         />
@@ -89,7 +141,7 @@ export default function App() {
         <Payment orderId={orderId} total={orderTotal} onSubmitted={() => navigate('confirmation')} />
       )}
 
-      {page === 'confirmation' && <Confirmation orderId={orderId} />}
+      {page === 'confirmation' && <Confirmation orderId={orderId} telegramDeclined={telegramDeclined} />}
 
       {page === 'store' && cartCount > 0 && (
         <div className="mobile-cart-bar">
