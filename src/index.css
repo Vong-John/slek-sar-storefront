@@ -363,21 +363,26 @@ a { color: inherit; text-decoration: none; }
 .cart-summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; color: #54524b; }
 .cart-summary-row.total { font-weight: 600; font-size: 18px; color: var(--charcoal); margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--line); }
 
-/* ---------- Payment QR placeholder ---------- */
-.qr-placeholder {
-  border: 1px dashed var(--line);
+/* ---------- Payment QR code ---------- */
+.qr-code {
+  border: 1px solid var(--line);
   background: var(--ivory-soft);
   border-radius: 14px;
-  aspect-ratio: 1 / 1;
-  max-width: 260px;
-  margin: 0 auto 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #8a877e;
-  font-size: 13px;
+  max-width: 280px;
+  margin: 0 auto;
+  padding: 16px;
+  box-shadow: 0 12px 28px rgba(38,36,32,0.08);
+}
+.qr-code img {
+  width: 100%;
+  border-radius: 6px;
+}
+.qr-caption {
   text-align: center;
-  padding: 20px;
+  font-size: 13px;
+  color: #6b6960;
+  margin: 12px auto 24px;
+  max-width: 280px;
 }
 
 /* ---------- Header nav / mega menu ---------- */
