@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function Checkout({ cart, telegramToken, onOrderCreated }) {
+export default function Checkout({ cart, telegramToken, telegramDeclined, onOrderCreated }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
@@ -20,6 +20,10 @@ export default function Checkout({ cart, telegramToken, onOrderCreated }) {
         customer_phone: phone.trim(),
         customer_address: address.trim(),
         telegram_access_token: telegramToken || undefined,
+        // Lets you tell "no Telegram, customer was warned and chose this"
+        // apart from a silent drop-off, once the create-order function and
+        // orders table have a place to store it.
+        telegram_declined: telegramDeclined || undefined,
         items: cart.map((item) => ({ product_id: item.id, quantity: item.qty })),
       })
       onOrderCreated(result.order_id, result.total)
@@ -34,13 +38,10 @@ export default function Checkout({ cart, telegramToken, onOrderCreated }) {
     <div className="container page-section">
       <h1 className="section-title">Your Details</h1>
 
-      {!telegramToken && (
+      {telegramDeclined && (
         <div className="status-banner warn">
-          You didn't come in through our Telegram bot link, so we won't be able to send your invoice there.
-          <br />
-          <a href="https://t.me/sleksar_bot" style={{ textDecoration: 'underline', fontWeight: 700 }}>
-            Tap here to start the bot first
-          </a>
+          Just a reminder — since you're continuing without Telegram, you won't receive an
+          order summary or delivery updates for this order.
         </div>
       )}
 
