@@ -1,5 +1,8 @@
 import { useState } from 'react'
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const QR_URL = `${SUPABASE_URL}/storage/v1/object/public/product-images/branding/payment-qr.jpg`
+
 export default function Payment({ orderId, total, onSubmitted }) {
   const [file, setFile] = useState(null)
   const [txRef, setTxRef] = useState('')
@@ -38,10 +41,10 @@ export default function Payment({ orderId, total, onSubmitted }) {
         Total to pay: <strong>${Number(total).toFixed(2)}</strong>
       </div>
 
-      {/* Replace this placeholder with your actual ABA/Wing QR image */}
-      <div className="qr-placeholder">
-        [ Your payment QR code goes here — upload it as a static image ]
+      <div className="qr-code">
+        <img src={QR_URL} alt="Scan with your banking app to pay via KHQR" />
       </div>
+      <p className="qr-caption">Scan with your banking app (ABA, Wing, ACLEDA, etc.) to pay via KHQR</p>
 
       {error && <div className="status-banner error">{error}</div>}
 
