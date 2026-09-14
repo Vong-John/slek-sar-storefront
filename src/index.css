@@ -537,6 +537,84 @@ a { color: inherit; text-decoration: none; }
 .category-section { scroll-margin-top: 90px; padding: 8px 0 40px; }
 .category-title { font-family: var(--font-heading); font-size: 22px; font-weight: 500; color: var(--leaf-green-deep); margin-bottom: 18px; }
 
+/* ---------- Telegram landing gate ---------- */
+.gate-overlay {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--ivory);
+}
+.gate-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--ivory-soft);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 24px 48px rgba(38,36,32,0.10);
+}
+.gate-eyebrow { color: var(--pen-brown); font-size: 13px; font-weight: 500; margin-bottom: 10px; }
+.gate-title { font-family: var(--font-heading); font-size: 22px; font-weight: 500; color: var(--leaf-green-deep); line-height: 1.25; }
+.gate-body { margin-top: 12px; font-size: 14px; color: #54524b; line-height: 1.5; }
+
+.gate-primary-btn {
+  width: 100%;
+  margin-top: 22px;
+  background: var(--leaf-green-deep);
+  color: var(--ivory);
+  padding: 13px 20px;
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 14.5px;
+  text-align: center;
+  transition: background 0.15s ease;
+}
+.gate-primary-btn:hover { background: var(--leaf-green); }
+
+.gate-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: #9a978d;
+  font-size: 12px;
+}
+.gate-divider::before,
+.gate-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.gate-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12.5px;
+  color: #6b6960;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.gate-checkbox-row input { margin-top: 3px; flex-shrink: 0; }
+
+.gate-secondary-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--charcoal);
+  text-align: center;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.gate-secondary-btn:not(:disabled):hover { border-color: var(--pen-brown-deep); color: var(--pen-brown-deep); }
+.gate-secondary-btn:disabled { color: #b8b5aa; cursor: not-allowed; }
+
 /* ---------- Contact page ---------- */
 .contact-card {
   background: var(--ivory-soft);
