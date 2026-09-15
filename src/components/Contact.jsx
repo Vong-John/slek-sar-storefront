@@ -15,7 +15,7 @@ export default function Contact() {
           <div>
             Facebook<br />
             {/* TODO: replace with your real Facebook page URL */}
-            <a href="#" target="_blank" rel="noreferrer">facebook.com/sleksar</a>
+            <a href="https://web.facebook.com/sleksar" target="_blank" rel="noreferrer">Facebook Page: ស្លឹកសារ - Slek Sar</a>
           </div>
         </div>
         <div className="contact-row">
