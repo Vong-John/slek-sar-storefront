@@ -23,7 +23,7 @@ export default function Contact() {
           <div>
             Location<br />
             {/* TODO: replace with your real address */}
-            Add your delivery / pickup address here
+            Kampong Tralach Ler Village, Kampong Tralach Commune, Kampong Tralach Disctrict, Kampong Chhnang Provice.
           </div>
         </div>
       </div>
