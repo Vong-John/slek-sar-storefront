@@ -31,16 +31,42 @@ export default function App() {
   const [orderId, setOrderId] = useState(null)
   const [orderTotal, setOrderTotal] = useState(0)
 
-  // Read the ?token=... from the URL (from the personalized shop link)
+  // Read the ?token=... (and, for the payment re-upload flow, ?order_id=...)
+  // from the URL (from the personalized shop link / reject-flow link).
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const token = params.get('token')
+    const orderIdParam = params.get('order_id')
+
     if (token) {
       setTelegramToken(token)
       setGateResolved(true)
       sessionStorage.removeItem(CONTACT_STATUS_KEY)
+
+      if (orderIdParam) {
+        // Arriving via a re-upload link (e.g. after a payment rejection).
+        // Fetch the real order total instead of trusting orderTotal state,
+        // which only ever gets set during a normal checkout flow and would
+        // otherwise show as $0.00 here.
+        import('./lib/supabase').then(({ fetchOrderTotal }) => {
+          fetchOrderTotal(orderIdParam)
+            .then((total) => {
+              setOrderId(orderIdParam)
+              setOrderTotal(total)
+              setPage('payment')
+            })
+            .catch((err) => {
+              console.error('Failed to fetch order total:', err)
+              // Fallback: still send them to payment so they aren't
+              // stranded on the home page, just without a prefilled total.
+              setOrderId(orderIdParam)
+              setPage('payment')
+            })
+        })
+      }
       return
     }
+
     // No token in the URL this load — check if they already acknowledged
     // skipping Telegram earlier in this browser session, so we don't
     // ask twice.
