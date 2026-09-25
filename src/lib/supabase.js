@@ -56,3 +56,20 @@ export async function fetchActiveProducts() {
   if (error) throw error
   return data
 }
+
+// Fetches the total amount owed for a single order. Used when a customer
+// arrives via a re-upload link (after a payment rejection) so the Payment
+// page can show the correct amount instead of $0.00.
+//
+// NOTE: this assumes your `orders` table has a `total` column. If your
+// column is named differently (e.g. total_amount, grand_total), update
+// the .select() and the destructured property name below to match.
+export async function fetchOrderTotal(orderId) {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('total')
+    .eq('id', orderId)
+    .single()
+  if (error) throw error
+  return data.total
+}
