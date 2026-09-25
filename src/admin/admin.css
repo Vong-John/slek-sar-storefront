@@ -1,0 +1,456 @@
+/* =====================================================================
+   Admin portal styles.
+
+   Deliberately NOT the storefront look. The shop is ivory, serif and
+   airy because browsing plants should feel unhurried. This is a
+   workbench: you're comparing a screenshot against an amount and
+   clicking approve, often on a phone, often in a hurry. So: cooler,
+   denser, higher contrast, and the brand green is spent in exactly one
+   place — the confirm action — so it always means "this is the
+   consequential button."
+
+   All classes are prefixed .ad- so nothing here can collide with the
+   storefront's stylesheet.
+   ===================================================================== */
+
+.ad-shell,
+.ad-login,
+.ad-boot {
+  --ad-bg: #10151A;
+  --ad-surface: #171E25;
+  --ad-surface-2: #1E262F;
+  --ad-line: rgba(255, 255, 255, 0.09);
+  --ad-line-strong: rgba(255, 255, 255, 0.16);
+  --ad-text: #E8EDF2;
+  --ad-text-dim: #9AA7B4;
+  --ad-text-faint: #6B7885;
+  --ad-green: #3FA35C;
+  --ad-green-bright: #4FC271;
+  --ad-amber: #D9A441;
+  --ad-red: #D4564B;
+  --ad-radius: 8px;
+
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--ad-text);
+  background: var(--ad-bg);
+  min-height: 100vh;
+}
+
+.ad-boot,
+.ad-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* ---------- sign in ---------- */
+
+.ad-login-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--ad-surface);
+  border: 1px solid var(--ad-line);
+  border-radius: 12px;
+  padding: 28px;
+}
+.ad-login-brand {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 18px;
+  color: var(--ad-green-bright);
+  margin-bottom: 20px;
+}
+.ad-login-title {
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- top bar ---------- */
+
+.ad-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--ad-surface);
+  border-bottom: 1px solid var(--ad-line);
+}
+.ad-bar-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 16px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.ad-bar-brand {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 16px;
+  color: var(--ad-green-bright);
+  white-space: nowrap;
+}
+.ad-bar-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--ad-text-faint);
+  margin-left: 6px;
+  letter-spacing: 0.04em;
+}
+.ad-bar-nav {
+  display: flex;
+  gap: 2px;
+  margin-right: auto;
+}
+.ad-bar-nav button {
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ad-text-dim);
+  padding: 8px 12px;
+  border-radius: var(--ad-radius);
+  cursor: pointer;
+}
+.ad-bar-nav button:hover { color: var(--ad-text); background: var(--ad-surface-2); }
+.ad-bar-nav button.is-active { color: var(--ad-text); background: var(--ad-surface-2); }
+.ad-bar-user { display: flex; align-items: center; gap: 10px; }
+.ad-bar-who { font-size: 13px; color: var(--ad-text-faint); }
+
+@media (max-width: 620px) {
+  .ad-bar-inner { gap: 10px; }
+  .ad-bar-who { display: none; }
+  .ad-bar-brand .ad-bar-sub { display: none; }
+}
+
+/* ---------- page frame ---------- */
+
+.ad-main { max-width: 1080px; margin: 0 auto; padding: 20px 16px 80px; }
+.ad-page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.ad-page-title { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; }
+.ad-sub {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ad-text-faint);
+  margin: 0 0 8px;
+}
+.ad-muted { color: var(--ad-text-dim); font-size: 14px; padding: 8px 0; }
+.ad-hint { font-size: 12px; color: var(--ad-text-faint); margin-top: 6px; line-height: 1.45; }
+.ad-empty {
+  border: 1px dashed var(--ad-line-strong);
+  border-radius: var(--ad-radius);
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--ad-text-dim);
+  font-size: 14px;
+}
+.ad-ok { color: var(--ad-green-bright); }
+.ad-warn { color: var(--ad-amber); }
+
+/* ---------- buttons ---------- */
+
+.ad-btn {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 9px 16px;
+  border-radius: var(--ad-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: var(--ad-surface-2);
+  color: var(--ad-text);
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.ad-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.ad-btn-sm { padding: 6px 11px; font-size: 13px; }
+.ad-btn-block { width: 100%; }
+.ad-btn-quiet { background: transparent; border-color: var(--ad-line-strong); color: var(--ad-text-dim); }
+.ad-btn-quiet:hover:not(:disabled) { color: var(--ad-text); border-color: var(--ad-text-faint); }
+.ad-btn-primary { background: var(--ad-green); color: #fff; }
+.ad-btn-primary:hover:not(:disabled) { background: var(--ad-green-bright); }
+
+/* The one loud button in the whole portal. Confirming payment moves
+   money, stock and a customer notification at once — it should feel
+   different from everything else. */
+.ad-btn-confirm {
+  background: var(--ad-green);
+  color: #fff;
+  font-weight: 600;
+  padding: 12px 20px;
+  flex: 1;
+}
+.ad-btn-confirm:hover:not(:disabled) { background: var(--ad-green-bright); }
+
+.ad-btn-reject { background: transparent; border-color: var(--ad-line-strong); color: var(--ad-text-dim); padding: 12px 18px; }
+.ad-btn-reject:hover:not(:disabled) { color: var(--ad-red); border-color: var(--ad-red); }
+.ad-btn-reject-armed { background: var(--ad-red); color: #fff; border-color: var(--ad-red); padding: 12px 18px; }
+
+/* ---------- alerts ---------- */
+
+.ad-alert {
+  padding: 11px 14px;
+  border-radius: var(--ad-radius);
+  font-size: 13.5px;
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+.ad-alert-error { background: rgba(212, 86, 75, 0.13); color: #F0A29A; border: 1px solid rgba(212, 86, 75, 0.3); }
+.ad-alert-warn { background: rgba(217, 164, 65, 0.12); color: #E5C07B; border: 1px solid rgba(217, 164, 65, 0.28); }
+
+/* ---------- form controls ---------- */
+
+.ad-field { margin-bottom: 14px; }
+.ad-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ad-text-dim);
+  margin-bottom: 6px;
+}
+.ad-field input,
+.ad-field textarea,
+.ad-field select,
+.ad-note {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  padding: 10px 12px;
+  background: var(--ad-bg);
+  border: 1px solid var(--ad-line-strong);
+  border-radius: var(--ad-radius);
+  color: var(--ad-text);
+}
+.ad-field textarea { resize: vertical; }
+.ad-field input:focus,
+.ad-field textarea:focus,
+.ad-field select:focus,
+.ad-note:focus {
+  outline: none;
+  border-color: var(--ad-green);
+}
+.ad-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ad-form { max-width: 560px; }
+.ad-form-actions { display: flex; gap: 10px; margin-top: 20px; }
+.ad-check { display: flex; align-items: center; gap: 9px; font-size: 14px; cursor: pointer; margin-top: 4px; }
+
+/* ---------- status pills ---------- */
+
+.ad-pill {
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 99px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.ad-pill-pending_verification { background: rgba(217, 164, 65, 0.15); color: #E5C07B; border-color: rgba(217, 164, 65, 0.3); }
+.ad-pill-pending_payment { background: rgba(255, 255, 255, 0.06); color: var(--ad-text-dim); border-color: var(--ad-line-strong); }
+.ad-pill-confirmed { background: rgba(63, 163, 92, 0.15); color: #7FD199; border-color: rgba(63, 163, 92, 0.32); }
+.ad-pill-payment_rejected { background: rgba(212, 86, 75, 0.14); color: #F0A29A; border-color: rgba(212, 86, 75, 0.3); }
+.ad-pill-cancelled,
+.ad-pill-pending_info { background: rgba(255, 255, 255, 0.05); color: var(--ad-text-faint); }
+.ad-pill-hidden { background: rgba(255, 255, 255, 0.07); color: var(--ad-text-dim); margin-top: 6px; display: inline-block; }
+
+/* ---------- order queue tabs ---------- */
+
+.ad-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+.ad-tab {
+  font: inherit;
+  font-size: 13.5px;
+  padding: 7px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--ad-line-strong);
+  background: transparent;
+  color: var(--ad-text-dim);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ad-tab:hover { color: var(--ad-text); }
+.ad-tab.is-active { background: var(--ad-text); color: var(--ad-bg); border-color: var(--ad-text); font-weight: 500; }
+
+/* ---------- order rows ---------- */
+
+.ad-order-list { display: flex; flex-direction: column; gap: 8px; }
+.ad-order {
+  background: var(--ad-surface);
+  border: 1px solid var(--ad-line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.ad-order.is-open { border-color: var(--ad-line-strong); }
+.ad-order-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 15px;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ad-order-head:hover { background: var(--ad-surface-2); }
+.ad-order-head-main { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.ad-order-code { font-size: 12.5px; color: var(--ad-text-faint); letter-spacing: 0.02em; }
+.ad-order-name {
+  font-size: 14.5px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ad-order-head-meta { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.ad-order-total { font-size: 14.5px; font-weight: 600; }
+.ad-order-when { font-size: 12.5px; color: var(--ad-text-faint); min-width: 44px; text-align: right; }
+
+@media (max-width: 620px) {
+  .ad-order-head { flex-direction: column; align-items: stretch; gap: 8px; }
+  .ad-order-head-meta { justify-content: space-between; }
+  .ad-order-when { text-align: left; }
+}
+
+.ad-order-body { padding: 4px 15px 16px; border-top: 1px solid var(--ad-line); }
+.ad-order-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-top: 14px; }
+@media (max-width: 720px) {
+  .ad-order-cols { grid-template-columns: 1fr; gap: 20px; }
+}
+
+.ad-dl { display: grid; grid-template-columns: 74px 1fr; gap: 5px 10px; font-size: 13.5px; margin-bottom: 18px; }
+.ad-dl dt { color: var(--ad-text-faint); }
+.ad-dl dd { color: var(--ad-text); }
+.ad-dl a { color: var(--ad-green-bright); }
+
+.ad-items { width: 100%; font-size: 13.5px; border-collapse: collapse; }
+.ad-items td { padding: 5px 0; }
+.ad-num { text-align: right; font-variant-numeric: tabular-nums; }
+.ad-items-sub td { color: var(--ad-text-dim); }
+.ad-items-total td {
+  font-weight: 600;
+  border-top: 1px solid var(--ad-line);
+  padding-top: 8px;
+}
+
+.ad-txref { font-size: 13px; color: var(--ad-text-dim); margin-bottom: 10px; }
+.ad-txref strong { color: var(--ad-text); font-variant-numeric: tabular-nums; }
+.ad-proof {
+  display: block;
+  border: 1px solid var(--ad-line-strong);
+  border-radius: var(--ad-radius);
+  overflow: hidden;
+  background: var(--ad-bg);
+}
+.ad-proof img { width: 100%; max-height: 380px; object-fit: contain; display: block; }
+
+.ad-reviewed {
+  font-size: 12.5px;
+  color: var(--ad-text-faint);
+  padding: 12px 0 0;
+  border-top: 1px solid var(--ad-line);
+  margin-top: 14px;
+}
+
+.ad-actions { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--ad-line); }
+.ad-actions-row { display: flex; gap: 10px; margin-top: 10px; }
+
+/* ---------- products ---------- */
+
+.ad-prod-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+}
+.ad-prod {
+  display: flex;
+  flex-direction: column;
+  background: var(--ad-surface);
+  border: 1px solid var(--ad-line);
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.ad-prod:hover { border-color: var(--ad-line-strong); }
+.ad-prod-thumb {
+  aspect-ratio: 4 / 3;
+  background: var(--ad-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ad-prod-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ad-prod-nophoto { font-size: 12px; color: var(--ad-text-faint); }
+.ad-prod-info { padding: 11px 12px 13px; }
+.ad-prod-title { font-size: 14px; font-weight: 500; margin-bottom: 5px; }
+.ad-prod-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ad-text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.ad-photos { display: flex; flex-wrap: wrap; gap: 9px; }
+.ad-photo { position: relative; width: 82px; height: 82px; border-radius: var(--ad-radius); overflow: hidden; border: 1px solid var(--ad-line-strong); }
+.ad-photo img { width: 100%; height: 100%; object-fit: cover; }
+.ad-photo-x {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(16, 21, 26, 0.85);
+  color: var(--ad-text);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+.ad-photo-add {
+  width: 82px;
+  height: 82px;
+  border: 1px dashed var(--ad-line-strong);
+  border-radius: var(--ad-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--ad-text-dim);
+  text-align: center;
+  cursor: pointer;
+  padding: 6px;
+}
+.ad-photo-add:hover { border-color: var(--ad-green); color: var(--ad-text); }
+
+/* ---------- accessibility floor ---------- */
+
+.ad-shell :focus-visible,
+.ad-login :focus-visible {
+  outline: 2px solid var(--ad-green-bright);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ad-shell *, .ad-login * { transition: none !important; }
+}
