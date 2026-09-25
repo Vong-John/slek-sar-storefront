@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchOrders, fetchPaymentProof, reviewPayment } from '../lib/adminApi'
+import { fetchOrders, fetchPaymentProof, reviewPayment, resetOrder } from '../lib/adminApi'
 
 const MAX_ATTEMPTS = 3 // mirrors the cap in review-payment — for display only
 
@@ -138,6 +138,7 @@ function OrderDetail({ order, adminId, onReviewed }) {
   const [busy, setBusy] = useState(null) // 'confirm' | 'reject'
   const [actionError, setActionError] = useState(null)
   const [confirmingReject, setConfirmingReject] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -176,6 +177,19 @@ function OrderDetail({ order, adminId, onReviewed }) {
     } finally {
       setBusy(null)
       setConfirmingReject(false)
+    }
+  }
+
+  async function handleReset() {
+    setResetting(true)
+    setActionError(null)
+    try {
+      await resetOrder(order.id, adminId)
+      onReviewed()
+    } catch (err) {
+      setActionError(err.message)
+    } finally {
+      setResetting(false)
     }
   }
 
@@ -275,6 +289,16 @@ function OrderDetail({ order, adminId, onReviewed }) {
             {order.failed_payment_count >= MAX_ATTEMPTS - 1 &&
               " Rejecting now will use their last retry — they'll be told to contact you directly instead."}
           </div>
+        </div>
+      )}
+
+      {order.status === 'payment_rejected' && order.failed_payment_count >= MAX_ATTEMPTS && (
+        <div className="ad-actions">
+          {actionError && <div className="ad-alert ad-alert-error">{actionError}</div>}
+          <button className="ad-btn ad-btn-quiet" onClick={handleReset} disabled={resetting}>
+            {resetting ? 'Resetting…' : 'Reset order (allow retry)'}
+          </button>
+          <div className="ad-hint">Clears the reject count and lets the customer submit a new payment.</div>
         </div>
       )}
     </div>
