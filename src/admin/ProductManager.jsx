@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchAllProducts, saveProduct, deleteProduct, uploadProductImage } from '../lib/adminApi'
+import { fetchAllProducts, saveProduct, deleteProduct, uploadProductImage, notifyNewProduct } from '../lib/adminApi'
 
 const CATEGORIES = [
   { id: 'indoor', label: 'Indoor Plants' },
@@ -23,7 +23,7 @@ function money(n) {
   return `$${Number(n ?? 0).toFixed(2)}`
 }
 
-export default function ProductManager() {
+export default function ProductManager({ adminId }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -49,6 +49,7 @@ export default function ProductManager() {
     return (
       <ProductForm
         initial={editing}
+        adminId={adminId}
         onCancel={() => setEditing(null)}
         onSaved={() => {
           setEditing(null)
@@ -104,7 +105,7 @@ export default function ProductManager() {
   )
 }
 
-function ProductForm({ initial, onCancel, onSaved }) {
+function ProductForm({ initial, adminId, onCancel, onSaved }) {
   const [form, setForm] = useState(initial)
   const [busy, setBusy] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -146,7 +147,16 @@ function ProductForm({ initial, onCancel, onSaved }) {
     setBusy(true)
     setError(null)
     try {
-      await saveProduct(form)
+      const saved = await saveProduct(form)
+
+      // Only announce brand-new, visible products — editing an existing
+      // one, or saving a hidden draft, should never trigger a broadcast.
+      if (isNew && saved.is_active && adminId) {
+        notifyNewProduct(saved.id, adminId).catch((err) => {
+          console.error('Product saved, but notification failed:', err)
+        })
+      }
+
       onSaved()
     } catch (err) {
       setError(err.message)
@@ -288,7 +298,7 @@ function ProductForm({ initial, onCancel, onSaved }) {
         </div>
         {!isNew && (
           <div className="ad-hint">
-            To take something off the shop without losing its order history, untick “Show this product” instead of
+            To take something off the shop without losing its order history, untick "Show this product" instead of
             deleting.
           </div>
         )}
