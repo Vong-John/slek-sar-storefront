@@ -71,7 +71,9 @@ export default function AdminApp() {
         </div>
       </header>
 
-      <main className="ad-main">{tab === 'orders' ? <OrderQueue adminId={profile.user_id} /> : <ProductManager />}</main>
+      <main className="ad-main">
+        {tab === 'orders' ? <OrderQueue adminId={profile.user_id} /> : <ProductManager adminId={profile.user_id} />}
+      </main>
     </div>
   )
 }
