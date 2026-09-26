@@ -277,3 +277,109 @@ function ProductForm({ initial, adminId, onCancel, onSaved }) {
           <textarea
             id="p-desc"
             rows={3}
+            value={form.description ?? ''}
+            onChange={(e) => set('description', e.target.value)}
+            placeholder="Light, watering, pot size — whatever helps someone choose."
+          />
+        </div>
+
+        <div className="ad-field-row">
+          <div className="ad-field">
+            <label htmlFor="p-price">Selling price ($)</label>
+            <input
+              id="p-price"
+              type="number"
+              step="0.01"
+              min="0"
+              value={form.selling_price}
+              onChange={(e) => set('selling_price', e.target.value)}
+              required
+            />
+          </div>
+          <div className="ad-field">
+            <label htmlFor="p-cost">Cost price ($)</label>
+            <input
+              id="p-cost"
+              type="number"
+              step="0.01"
+              min="0"
+              value={form.cost_price ?? ''}
+              onChange={(e) => set('cost_price', e.target.value)}
+              placeholder="Optional"
+            />
+            <div className="ad-hint">Never shown to customers.</div>
+          </div>
+        </div>
+
+        <div className="ad-field-row">
+          <div className="ad-field">
+            <label htmlFor="p-stock">Stock</label>
+            <input
+              id="p-stock"
+              type="number"
+              min="0"
+              value={form.stock_qty}
+              onChange={(e) => set('stock_qty', e.target.value)}
+            />
+          </div>
+          <div className="ad-field">
+            <label htmlFor="p-cat">Category</label>
+            <select id="p-cat" value={form.category ?? ''} onChange={(e) => set('category', e.target.value)}>
+              {CATEGORIES.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="ad-field">
+          <label>Photos</label>
+          <div className="ad-photos">
+            {(form.images ?? []).map((url) => (
+              <div key={url} className="ad-photo">
+                <img src={url} alt="" />
+                <button type="button" className="ad-photo-x" onClick={() => removeImage(url)} aria-label="Remove photo">
+                  ×
+                </button>
+              </div>
+            ))}
+            <label className="ad-photo-add">
+              <input type="file" accept="image/*" onChange={handleUpload} hidden />
+              {uploading ? 'Uploading…' : '+ Add photo'}
+            </label>
+          </div>
+          <div className="ad-hint">The first photo is the one customers see in the shop grid.</div>
+        </div>
+
+        <label className="ad-check">
+          <input type="checkbox" checked={form.is_active} onChange={(e) => set('is_active', e.target.checked)} />
+          <span>Show this product in the shop</span>
+        </label>
+
+        <div className="ad-form-actions">
+          <button className="ad-btn ad-btn-primary" type="submit" disabled={busy || uploading}>
+            {busy ? 'Saving…' : isNew ? 'Add product' : 'Save changes'}
+          </button>
+          {!isNew && (
+            <button
+              type="button"
+              className={confirmDelete ? 'ad-btn ad-btn-reject-armed' : 'ad-btn ad-btn-reject'}
+              onClick={handleDelete}
+              disabled={busy}
+            >
+              {confirmDelete ? 'Tap again to delete' : 'Delete'}
+            </button>
+          )}
+        </div>
+        {!isNew && (
+          <div className="ad-hint">
+            To take something off the shop without losing its order history, untick "Show this product" instead of
+            deleting.
+          </div>
+        )}
+      </form>
+    </div>
+  )
+}
