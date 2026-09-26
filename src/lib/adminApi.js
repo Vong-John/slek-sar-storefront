@@ -20,6 +20,8 @@ export async function getSession() {
   return data.session ?? null
 }
 
+// Having a login is not the same as being an admin — the admins table is
+// the allowlist. This confirms the signed-in user is actually on it.
 export async function getAdminProfile() {
   const { data: userData } = await supabase.auth.getUser()
   const user = userData?.user
@@ -52,6 +54,9 @@ export async function fetchOrders(status = null) {
   return data ?? []
 }
 
+// Payment screenshots live in a private bucket — we mint a short-lived
+// signed URL rather than making the bucket public, so proof images can't
+// be guessed or shared around.
 export async function fetchPaymentProof(orderId) {
   const { data: rows, error } = await supabase
     .from('payment_proofs')
@@ -66,7 +71,7 @@ export async function fetchPaymentProof(orderId) {
 
   const { data: signed, error: signErr } = await supabase.storage
     .from('payment-proofs')
-    .createSignedUrl(proof.screenshot_url, 60 * 10)
+    .createSignedUrl(proof.screenshot_url, 60 * 10) // 10 minutes
 
   if (signErr) throw new Error(signErr.message)
   return { ...proof, url: signed.signedUrl }
