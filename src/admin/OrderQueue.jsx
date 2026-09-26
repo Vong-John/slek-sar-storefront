@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchOrders, fetchPaymentProof, reviewPayment, resetOrder } from '../lib/adminApi'
+import { fetchOrders, fetchPaymentProof, reviewPayment, resetOrder, terminateOrder } from '../lib/adminApi'
 
 const MAX_ATTEMPTS = 3 // mirrors the cap in review-payment — for display only
 
@@ -139,6 +139,7 @@ function OrderDetail({ order, adminId, onReviewed }) {
   const [actionError, setActionError] = useState(null)
   const [confirmingReject, setConfirmingReject] = useState(false)
   const [resetting, setResetting] = useState(false)
+  const [terminating, setTerminating] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -190,6 +191,19 @@ function OrderDetail({ order, adminId, onReviewed }) {
       setActionError(err.message)
     } finally {
       setResetting(false)
+    }
+  }
+
+  async function handleTerminate() {
+    setTerminating(true)
+    setActionError(null)
+    try {
+      await terminateOrder(order.id, adminId)
+      onReviewed()
+    } catch (err) {
+      setActionError(err.message)
+    } finally {
+      setTerminating(false)
     }
   }
 
@@ -299,6 +313,18 @@ function OrderDetail({ order, adminId, onReviewed }) {
             {resetting ? 'Resetting…' : 'Reset order (allow retry)'}
           </button>
           <div className="ad-hint">Clears the reject count and lets the customer submit a new payment.</div>
+        </div>
+      )}
+
+      {order.status === 'payment_rejected' && (
+        <div className="ad-actions">
+          {actionError && <div className="ad-alert ad-alert-error">{actionError}</div>}
+          <button className="ad-btn ad-btn-quiet" onClick={handleTerminate} disabled={terminating}>
+            {terminating ? 'Terminating…' : 'Terminate (let them /start fresh)'}
+          </button>
+          <div className="ad-hint">
+            Closes this order permanently. Customer can send /start to begin a brand new order.
+          </div>
         </div>
       )}
     </div>
