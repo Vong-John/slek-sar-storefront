@@ -186,44 +186,6 @@ export async function uploadProductImage(file) {
   return data.publicUrl
 }
 
-export async function notifyNewProduct(productId, adminId) {
-  const session = await getSession()
-  if (!session) throw new Error('Your session expired — please sign in again.')
-
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/notify-new-product`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${session.access_token}`,
-      apikey: SUPABASE_ANON_KEY,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ product_id: productId, admin_id: adminId }),
-  })
-
-  const data = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(data.error || 'Could not send notification.')
-  return data
-}
-
-export async function notifyRestock(productId, adminId) {
-  const session = await getSession()
-  if (!session) throw new Error('Your session expired — please sign in again.')
-
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/notify-restock`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${session.access_token}`,
-      apikey: SUPABASE_ANON_KEY,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ product_id: productId, admin_id: adminId }),
-  })
-
-  const data = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(data.error || 'Could not send restock notification.')
-  return data
-}
-
 export async function notifyProducts(productIds, type, adminId) {
   const session = await getSession()
   if (!session) throw new Error('Your session expired — please sign in again.')
@@ -241,16 +203,4 @@ export async function notifyProducts(productIds, type, adminId) {
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(data.error || 'Could not send notification.')
   return data
-}
-
-// ---------- products ----------
-
-export async function fetchAllProducts() {
-  const { data, error } = await supabase
-    .from('products')
-    .select('id, title, description, images, selling_price, cost_price, stock_qty, category, is_active, created_at')
-    .order('created_at', { ascending: false })
-
-  if (error) throw new Error(error.message)
-  return data ?? []
 }
