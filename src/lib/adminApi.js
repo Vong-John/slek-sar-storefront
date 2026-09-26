@@ -115,6 +115,25 @@ export async function resetOrder(orderId, adminId) {
   return data
 }
 
+export async function terminateOrder(orderId, adminId) {
+  const session = await getSession()
+  if (!session) throw new Error('Your session expired — please sign in again.')
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/terminate-order`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      apikey: SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ order_id: orderId, admin_id: adminId }),
+  })
+
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.error || 'Could not terminate that order.')
+  return data
+}
+
 // ---------- products ----------
 
 export async function fetchAllProducts() {
