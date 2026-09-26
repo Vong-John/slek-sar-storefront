@@ -67,6 +67,11 @@ export default function ProductManager({ adminId }) {
 
   const lowStock = products.filter((p) => p.is_active && Number(p.stock_qty) <= 2)
 
+  // Products the announce picker is allowed to show/select. Hidden/inactive
+  // products (including test items like "Reject Flow Test") must never be
+  // selectable here — they can still be viewed/edited in the normal grid.
+  const announceableProducts = products.filter((p) => p.is_active)
+
   function toggleSelectMode() {
     setSelectMode((v) => !v)
     setSelectedIds([])
@@ -93,6 +98,8 @@ export default function ProductManager({ adminId }) {
       setNotifying(null)
     }
   }
+
+  const visibleProducts = selectMode ? announceableProducts : products
 
   return (
     <div className="ad-page">
@@ -125,14 +132,24 @@ export default function ProductManager({ adminId }) {
         </div>
       )}
 
+      {selectMode && (
+        <div className="ad-hint" style={{ marginBottom: '0.5rem' }}>
+          Only visible, in-shop products can be announced. Hidden/test products are excluded automatically.
+        </div>
+      )}
+
       {loading && <div className="ad-muted">Loading products…</div>}
 
       {!loading && !error && products.length === 0 && (
         <div className="ad-empty">No products yet. Add your first one to open the shop.</div>
       )}
 
+      {!loading && !error && selectMode && announceableProducts.length === 0 && (
+        <div className="ad-empty">No visible products to announce right now.</div>
+      )}
+
       <div className="ad-prod-grid">
-        {products.map((p) => {
+        {visibleProducts.map((p) => {
           const checked = selectedIds.includes(p.id)
           return (
             <div key={p.id} className={`ad-prod ${selectMode && checked ? 'is-selected' : ''}`}>
