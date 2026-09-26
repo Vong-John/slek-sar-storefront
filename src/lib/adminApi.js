@@ -20,8 +20,6 @@ export async function getSession() {
   return data.session ?? null
 }
 
-// Having a login is not the same as being an admin — the admins table is
-// the allowlist. This confirms the signed-in user is actually on it.
 export async function getAdminProfile() {
   const { data: userData } = await supabase.auth.getUser()
   const user = userData?.user
@@ -54,9 +52,6 @@ export async function fetchOrders(status = null) {
   return data ?? []
 }
 
-// Payment screenshots live in a private bucket — we mint a short-lived
-// signed URL rather than making the bucket public, so proof images can't
-// be guessed or shared around.
 export async function fetchPaymentProof(orderId) {
   const { data: rows, error } = await supabase
     .from('payment_proofs')
@@ -71,7 +66,7 @@ export async function fetchPaymentProof(orderId) {
 
   const { data: signed, error: signErr } = await supabase.storage
     .from('payment-proofs')
-    .createSignedUrl(proof.screenshot_url, 60 * 10) // 10 minutes
+    .createSignedUrl(proof.screenshot_url, 60 * 10)
 
   if (signErr) throw new Error(signErr.message)
   return { ...proof, url: signed.signedUrl }
@@ -184,4 +179,23 @@ export async function uploadProductImage(file) {
 
   const { data } = supabase.storage.from('product-images').getPublicUrl(path)
   return data.publicUrl
+}
+
+export async function notifyNewProduct(productId, adminId) {
+  const session = await getSession()
+  if (!session) throw new Error('Your session expired — please sign in again.')
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/notify-new-product`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      apikey: SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ product_id: productId, admin_id: adminId }),
+  })
+
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.error || 'Could not send notification.')
+  return data
 }
