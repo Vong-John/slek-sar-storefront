@@ -151,7 +151,7 @@ export async function saveProduct(product) {
     title: product.title.trim(),
     description: product.description?.trim() || null,
     selling_price: Number(product.selling_price),
-    cost_price: product.cost_price === '' || product.cost_price == null ? null : Number(product.cost_price),
+    cost_price: product.cost_price === '' || product.cost_price == null ? 0 : Number(product.cost_price),
     stock_qty: Number(product.stock_qty),
     category: product.category || null,
     images: product.images ?? [],
