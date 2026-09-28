@@ -2,61 +2,25 @@ import { useEffect, useState } from 'react'
 import { fetchActiveProducts } from '../lib/supabase'
 import ProductCard from './ProductCard'
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
-
 const CATEGORY_META = {
   indoor: { title: 'Indoor Plants' },
   outdoor: { title: 'Outdoor Plants' },
   gift: { title: 'Gift' },
 }
 
-// Checks the URL for a signed Telegram link (?tg=...&token=...) coming from
-// a notification message, and confirms with the backend that it's genuine.
-// Returns null if there's nothing to check, or if the link didn't verify.
-async function verifyCustomerFromUrl() {
-  const params = new URLSearchParams(window.location.search)
-  const tg = params.get('tg')
-  const token = params.get('token')
-  if (!tg || !token) return null
-
-  try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-customer-link`, {
-      method: 'POST',
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ chat_id: tg, token }),
-    })
-    const data = await res.json()
-    return data?.valid ? data : null
-  } catch {
-    // Network hiccup or bad link — fail quietly, just show the shop as normal.
-    return null
-  }
-}
-
-export default function Store({ anchor, onAddToCart }) {
+// `customer` is passed down from App.jsx once a notification link has been
+// verified (null for everyone else).
+export default function Store({ anchor, onAddToCart, customer }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [singleCol, setSingleCol] = useState(false)
-  const [customer, setCustomer] = useState(null) // { chat_id, recent_order } once verified, else null
 
   useEffect(() => {
     fetchActiveProducts()
       .then(setProducts)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [])
-
-  // Runs once on load: if this visit came from a notification link, confirm
-  // who it is so we can recognize them for this session.
-  useEffect(() => {
-    verifyCustomerFromUrl().then((result) => {
-      if (result) setCustomer(result)
-    })
   }, [])
 
   // Scroll to the requested category section once its content has rendered.
