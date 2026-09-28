@@ -9,9 +9,6 @@ import Payment from './components/Payment'
 import Confirmation from './components/Confirmation'
 import TelegramGate from './components/TelegramGate'
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
-
 const CART_STORAGE_KEY = 'sleksar_cart'
 const CONTACT_STATUS_KEY = 'sleksar_contact_status' // sessionStorage: 'declined' once acknowledged this visit
 
@@ -21,31 +18,6 @@ function loadStoredCart() {
     return raw ? JSON.parse(raw) : []
   } catch {
     return []
-  }
-}
-
-// Notification links look like  /?tg=<chat_id>&link_sig=<signature>&section=new
-// (link_sig, NOT token — ?token= is already used by the Telegram gate below).
-function readNotificationLink() {
-  const params = new URLSearchParams(window.location.search)
-  const tg = params.get('tg')
-  const sig = params.get('link_sig')
-  return tg && sig ? { tg, sig } : null
-}
-
-// Asks the backend whether the link is genuine. Returns the customer info
-// if it is, or null if it isn't (or the request failed).
-async function verifyNotificationLink({ tg, sig }) {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-customer-link`, {
-      method: 'POST',
-      headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: tg, token: sig }),
-    })
-    const data = await res.json()
-    return data?.valid ? data : null
-  } catch {
-    return null
   }
 }
 
@@ -59,23 +31,23 @@ export default function App() {
   const [orderId, setOrderId] = useState(null)
   const [orderTotal, setOrderTotal] = useState(0)
 
-  // Verified customer from a notification link (null for everyone else).
-  const [customer, setCustomer] = useState(null)
-  // True while we're checking a notification link, so the Telegram gate
-  // doesn't flash on screen for someone who's about to be let straight in.
-  const [linkChecking, setLinkChecking] = useState(() => readNotificationLink() !== null)
-
   // Read the ?token=... (and, for the payment re-upload flow, ?order_id=...)
   // from the URL (from the personalized shop link / reject-flow link).
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const token = params.get('token')
     const orderIdParam = params.get('order_id')
+    const section = params.get('section') // 'new' | 'restock' from announcement links
 
     if (token) {
       setTelegramToken(token)
       setGateResolved(true)
       sessionStorage.removeItem(CONTACT_STATUS_KEY)
+
+      // Announcement link: open the store page instead of staying on home.
+      if (!orderIdParam && (section === 'new' || section === 'restock')) {
+        setPage('store')
+      }
 
       if (orderIdParam) {
         // Arriving via a re-upload link (e.g. after a payment rejection).
@@ -108,26 +80,6 @@ export default function App() {
       setTelegramDeclined(true)
       setGateResolved(true)
     }
-  }, [])
-
-  // Notification link (new arrivals / back in stock): if the signature checks
-  // out, skip the Telegram gate and open the store page. If it doesn't, we do
-  // nothing special and the visitor just sees the normal gate/home flow.
-  useEffect(() => {
-    const link = readNotificationLink()
-    if (!link) return
-
-    verifyNotificationLink(link)
-      .then((result) => {
-        if (!result) return
-        setCustomer(result)
-        setTelegramDeclined(false)
-        sessionStorage.removeItem(CONTACT_STATUS_KEY)
-        setGateResolved(true)
-        setPage('store')
-        setStoreAnchor(null)
-      })
-      .finally(() => setLinkChecking(false))
   }, [])
 
   // Persist the cart so it survives a full page reload — including the
@@ -180,11 +132,6 @@ export default function App() {
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0)
   const cartTotal = cart.reduce((sum, i) => sum + i.selling_price * i.qty, 0) + (cart.length > 0 ? 2 : 0)
 
-  // Brief wait while a notification link is being verified.
-  if (linkChecking) {
-    return <p style={{ padding: '2rem', textAlign: 'center' }}>Loading… 🌿</p>
-  }
-
   if (!gateResolved) {
     return <TelegramGate onResolve={resolveGate} />
   }
@@ -195,7 +142,7 @@ export default function App() {
 
       {page === 'home' && <Home onNavigate={navigate} />}
 
-      {page === 'store' && <Store anchor={storeAnchor} onAddToCart={addToCart} customer={customer} />}
+      {page === 'store' && <Store anchor={storeAnchor} onAddToCart={addToCart} />}
 
       {page === 'contact' && <Contact />}
 
