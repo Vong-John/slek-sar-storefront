@@ -1,9 +1,27 @@
 import { useState } from 'react'
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+// Saves the customer's "yes, send me announcements" choice. Fire-and-forget:
+// if this fails, the order itself must not be affected.
+async function saveMarketingOptIn(token) {
+  try {
+    await fetch(`${SUPABASE_URL}/functions/v1/set-marketing-opt-in`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, opt_in: true }),
+    })
+  } catch (err) {
+    console.error('Could not save announcement preference:', err)
+  }
+}
+
 export default function Checkout({ cart, telegramToken, onOrderCreated }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+  const [wantsUpdates, setWantsUpdates] = useState(false) // unticked by default — real consent
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
 
@@ -22,6 +40,11 @@ export default function Checkout({ cart, telegramToken, onOrderCreated }) {
         telegram_access_token: telegramToken || undefined,
         items: cart.map((item) => ({ product_id: item.id, quantity: item.qty })),
       })
+
+      // Only ever send "yes". An unticked box does nothing, so it can't
+      // undo a "yes" the customer gave earlier.
+      if (wantsUpdates && telegramToken) saveMarketingOptIn(telegramToken)
+
       onOrderCreated(result.order_id, result.total)
     } catch (err) {
       setError(err.message || 'Something went wrong creating your order.')
@@ -65,6 +88,19 @@ export default function Checkout({ cart, telegramToken, onOrderCreated }) {
             required
           />
         </div>
+
+        {telegramToken && (
+          <label style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', margin: '0.75rem 0' }}>
+            <input
+              type="checkbox"
+              checked={wantsUpdates}
+              onChange={(e) => setWantsUpdates(e.target.checked)}
+              style={{ marginTop: '0.25rem' }}
+            />
+            <span>Tell me on Telegram when new plants arrive or come back in stock.</span>
+          </label>
+        )}
+
         <button className="primary-btn" type="submit" disabled={!canSubmit}>
           {submitting ? 'Placing order…' : 'Place Order'}
         </button>
