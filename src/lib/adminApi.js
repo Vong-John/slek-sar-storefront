@@ -134,6 +134,28 @@ export async function terminateOrder(orderId, adminId) {
   return data
 }
 
+// NEW: confirm a REJECTED order by hand (e.g. customer paid after a phone call).
+// No admin_id is sent on purpose: the edge function reads the admin from the
+// login token, so the audit log can't be faked from the browser.
+export async function manualConfirmOrder(orderId, note) {
+  const session = await getSession()
+  if (!session) throw new Error('Your session expired — please sign in again.')
+
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/manual-confirm-order`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      apikey: SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ order_id: orderId, note }),
+  })
+
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.error || 'Could not confirm that order.')
+  return data
+}
+
 // ---------- products ----------
 
 export async function fetchAllProducts() {
