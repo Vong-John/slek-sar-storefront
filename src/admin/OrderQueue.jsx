@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react'
-import { fetchOrders, fetchPaymentProof, reviewPayment, resetOrder, terminateOrder } from '../lib/adminApi'
+import {
+  fetchOrders,
+  fetchPaymentProof,
+  reviewPayment,
+  resetOrder,
+  terminateOrder,
+  manualConfirmOrder, // NEW
+} from '../lib/adminApi'
 
 const MAX_ATTEMPTS = 3 // mirrors the cap in review-payment — for display only
 
@@ -141,6 +148,11 @@ function OrderDetail({ order, adminId, onReviewed }) {
   const [resetting, setResetting] = useState(false)
   const [terminating, setTerminating] = useState(false)
 
+  // NEW: manual confirm (rejected order, customer paid after a phone call)
+  const [manualOpen, setManualOpen] = useState(false)
+  const [manualNote, setManualNote] = useState('')
+  const [manualBusy, setManualBusy] = useState(false)
+
   useEffect(() => {
     let cancelled = false
     fetchPaymentProof(order.id)
@@ -204,6 +216,27 @@ function OrderDetail({ order, adminId, onReviewed }) {
       setActionError(err.message)
     } finally {
       setTerminating(false)
+    }
+  }
+
+  // NEW
+  async function handleManualConfirm() {
+    const note = manualNote.trim()
+    if (note.length < 5) {
+      setActionError('Please add a note or payment reference (at least 5 characters).')
+      return
+    }
+    setManualBusy(true)
+    setActionError(null)
+    try {
+      await manualConfirmOrder(order.id, note)
+      setManualOpen(false)
+      setManualNote('')
+      onReviewed()
+    } catch (err) {
+      setActionError(err.message)
+    } finally {
+      setManualBusy(false)
     }
   }
 
@@ -313,6 +346,67 @@ function OrderDetail({ order, adminId, onReviewed }) {
             {resetting ? 'Resetting…' : 'Reset order (allow retry)'}
           </button>
           <div className="ad-hint">Clears the reject count and lets the customer submit a new payment.</div>
+        </div>
+      )}
+
+      {/* NEW: manual confirm — only for rejected orders whose customer has NO Telegram linked
+          (they never got the rejection and can't retry, so staff verify by phone instead) */}
+      {order.status === 'payment_rejected' && !order.telegram_chat_id && (
+        <div className="ad-actions">
+          {actionError && <div className="ad-alert ad-alert-error">{actionError}</div>}
+
+          {!manualOpen ? (
+            <>
+              <button
+                className="ad-btn ad-btn-confirm"
+                onClick={() => {
+                  setActionError(null)
+                  setManualOpen(true)
+                }}
+              >
+                📞 Confirm manually (paid after call)
+              </button>
+              <div className="ad-hint">
+                This customer has no Telegram, so they never received the rejection. After you call them and they
+                have paid, confirm here. A note is required and is saved in the audit log.
+              </div>
+            </>
+          ) : (
+            <>
+              <label className="ad-sub" htmlFor={`manual-note-${order.id}`}>
+                Payment reference / note
+              </label>
+              <textarea
+                id={`manual-note-${order.id}`}
+                className="ad-textarea"
+                rows={3}
+                maxLength={500}
+                placeholder='e.g. "Paid via ABA, ref 12345, confirmed by phone"'
+                value={manualNote}
+                onChange={(e) => setManualNote(e.target.value)}
+                disabled={manualBusy}
+              />
+              <div className="ad-actions-row">
+                <button className="ad-btn ad-btn-confirm" onClick={handleManualConfirm} disabled={manualBusy}>
+                  {manualBusy ? 'Confirming…' : 'Yes, confirm this order'}
+                </button>
+                <button
+                  className="ad-btn ad-btn-quiet"
+                  onClick={() => {
+                    setManualOpen(false)
+                    setManualNote('')
+                    setActionError(null)
+                  }}
+                  disabled={manualBusy}
+                >
+                  Cancel
+                </button>
+              </div>
+              <div className="ad-hint">
+                The customer won't be messaged automatically, so tell them by phone that the order is confirmed.
+              </div>
+            </>
+          )}
         </div>
       )}
 
